@@ -4,12 +4,17 @@ import { useState } from 'react'
 function App() {
   const [todos, addTodos]=useState([])
   const [todo, setTodo]=useState('')
+  
+
   const addToDo = () =>{
-    if(todo.trim()!=""){
-    addTodos([...todos, {id:Date.now(), todo: todo, status:false}])
+    if(todo.trim()=="")return false
+     let check=todos.some((val)=>val.todo==todo)
+     if(check)return alert('its already Added')
+        addTodos([...todos, {id:Date.now(), todo: todo, status:false}])
     setTodo('')
-     }
-  }
+      }
+    //
+  
   const makeTodo = (e) =>{
     setTodo(e.target.value)
   }
@@ -22,12 +27,11 @@ function App() {
 
   const changeAll=()=>{
     const updatedTodos=todos.map(todo=>({
-      ...todo,status:true
+      ...todo,status:!todo.status
     }))
     addTodos(updatedTodos)
   }
 
-  
 
   const removeTodo = (id) =>{
     const updatedTodos = todos.filter(todo=>todo.id!=id)
