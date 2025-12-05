@@ -1,17 +1,38 @@
 import './style.css'
 import { useState } from 'react'
+import Swal from 'sweetalert2'
 
 function App() {
   const [todos, addTodos]=useState([])
   const [todo, setTodo]=useState('')
-  
+
 
   const addToDo = () =>{
     if(todo.trim()=="")return false
      let check=todos.some((val)=>val.todo==todo)
-     if(check)return alert('its already Added')
+     if(check)return Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Did not allow duplicate Task!",
+    });
         addTodos([...todos, {id:Date.now(), todo: todo, status:false}])
     setTodo('')
+
+    const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  }
+});
+Toast.fire({
+  icon: "success",
+  title: "Task Added successfully"
+});
       }
     //
   
@@ -32,6 +53,21 @@ function App() {
       ...todo,status:!todo.status
     }))
     addTodos(updatedTodos)
+        const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      }
+    });
+    Toast.fire({
+      icon: "success",
+      title: "Marked successfully"
+    });
   }
 
 
@@ -39,6 +75,7 @@ function App() {
     const updatedTodos = todos.filter(todo=>todo.id!=id)
     addTodos(updatedTodos)
   }
+
    const removeALL=()=>{
     addTodos([])
   }
@@ -50,8 +87,10 @@ function App() {
     addTodos(updatedTodos)
     setTodo(todo)
   }
+  
 
   return(
+    
     <div className="main">
       <div className="todoBox">
         <div className="todoHeading">
@@ -60,11 +99,35 @@ function App() {
         <div className="todoAdd">
           <input value={todo} type="text" onChange={makeTodo}/>
           <i onClick={addToDo} class="bi bi-plus-circle"></i>
-          <i onClick={changeAll} class="bi bi-check-all"></i>
+
+          {todos.length!==0&&(
+            <>
+             <i onClick={changeAll} class="bi bi-check-all"></i>
           <i className="bi bi-x-octagon" 
           onClick={()=>{
-            if(confirm("Do you want delete all?"))removeALL()
+            // if(confirm("Do you want delete all?"))removeALL()
+          Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            removeALL()
+            Swal.fire({
+              title: "Deleted!",
+              text: "Your Task has been deleted.",
+              icon: "success"
+            });
+          }
+        });
           }} ></i>
+          </> 
+          )}
+         
 
         </div>
         <div className="todosMain">
@@ -76,43 +139,66 @@ function App() {
              
             </div>
            <div className="allTodos">
-  {todos.slice().reverse().map(todo => (
-    <div
-  key={todo.id}
-  className="todoList"
-  style={{
-    textDecoration: todo.status ? "line-through" : "none",
-  }}
->
+  {[...todos]
+    .sort((a, b) => Number(b.status) - Number(a.status)) 
+    .reverse() 
+    .map(todo => (
+      <div
+        key={todo.id}
+        className="todoList"
+        style={{
+          textDecoration: todo.status ? "line-through" : "none",
+        }}
+      >
+        <div className="todoDesc">
+          <p>{todo.todo}</p>
+        </div>
 
-      <div className="todoDesc">
-        <p>{todo.todo}</p>
+        <div className="todoAction">
+        
+          <i
+            className="bi bi-check-circle-fill doneTodo"
+            onClick={() => changeStatus(todo.id)}
+            
+            
+          ></i>
+
+          
+          <i
+            className="bi bi-pencil-fill"
+            onClick={() => editTodo(todo.todo, todo.id)}
+          ></i>
+
+        
+          <i
+            className="bi bi-x-circle-fill cancelTodo"
+            onClick={() => {
+              // if (confirm("Do you want delete?")) removeTodo(todo.id);
+              Swal.fire({
+              title: "Are you sure?",
+              text: "You won't be able to revert this!",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+              if (result.isConfirmed) {
+                removeTodo(todo.id)
+                Swal.fire({
+                  title: "Deleted!",
+                  text: "Your Task has been deleted.",
+                  icon: "success"
+                });
+              }
+            }); 
+            }}
+          ></i>
+        </div>
       </div>
-
-      <div className="todoAction">
-        {/* toggle complete */}
-        <i
-          className="bi bi-check-circle-fill doneTodo"
-          onClick={() => changeStatus(todo.id)}
-        ></i>
-
-        {/* edit */}
-        <i
-          className="bi bi-pencil-fill"
-          onClick={() => editTodo(todo.todo, todo.id)}
-        ></i>
-
-        {/* delete */}
-        <i
-          className="bi bi-x-circle-fill cancelTodo"
-          onClick={() => {
-            if (confirm("Do you want delete?")) removeTodo(todo.id);
-          }}
-        ></i>
-      </div>
-    </div>
-  ))}
+    ))}
 </div>
+
 
           </div>
         </div>
