@@ -25,6 +25,8 @@ function App() {
     addTodos(updatedTodos)
   }
 
+ 
+
   const changeAll=()=>{
     const updatedTodos=todos.map(todo=>({
       ...todo,status:!todo.status
@@ -37,6 +39,10 @@ function App() {
     const updatedTodos = todos.filter(todo=>todo.id!=id)
     addTodos(updatedTodos)
   }
+   const removeALL=()=>{
+    addTodos([])
+  }
+
   const editTodo = (todo,id) =>{
     const updatedTodos = todos.filter(todo=>
       todo.id!=id
@@ -55,6 +61,10 @@ function App() {
           <input value={todo} type="text" onChange={makeTodo}/>
           <i onClick={addToDo} class="bi bi-plus-circle"></i>
           <i onClick={changeAll} class="bi bi-check-all"></i>
+          <i className="bi bi-x-octagon" 
+          onClick={()=>{
+            if(confirm("Do you want delete all?"))removeALL()
+          }} ></i>
 
         </div>
         <div className="todosMain">
